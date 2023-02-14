@@ -19,6 +19,36 @@ type MergeMertens struct {
 	p unsafe.Pointer // This unsafe pointer will in fact be a C.MergeMertens
 }
 
+// MergeDebevec is a wrapper around the cv::MergeDebevec.
+type MergeDebevec struct {
+	p unsafe.Pointer // This unsafe pointer will in fact be a C.MergeDebevec
+}
+
+// MergeRobertson is a wrapper around the cv::MergeDebevec.
+type MergeRobertson struct {
+	p unsafe.Pointer // This unsafe pointer will in fact be a C.MergeRobertson
+}
+
+// Tonemap is a wrapper around the cv::Tonemap.
+type Tonemap struct {
+	p unsafe.Pointer // This unsafe pointer will in fact be a C.Tonemap
+}
+
+// TonemapDrago is a wrapper around the cv::TonemapDrago.
+type TonemapDrago struct {
+	p unsafe.Pointer // This unsafe pointer will in fact be a C.TonemapDrago
+}
+
+// TonemapMantiuk is a wrapper around the cv::TonemapMantiuk.
+type TonemapMantiuk struct {
+	p unsafe.Pointer // This unsafe pointer will in fact be a C.TonemapMantiuk
+}
+
+// TonemapReinhard is a wrapper around the cv::TonemapReinhard.
+type TonemapReinhard struct {
+	p unsafe.Pointer // This unsafe pointer will in fact be a C.TonemapReinhard
+}
+
 // AlignMTB is a wrapper around the cv::AlignMTB.
 type AlignMTB struct {
 	p unsafe.Pointer // This unsafe pointer will in fact be a C.AlignMTB
@@ -34,6 +64,22 @@ const (
 	// MonochromeTransfer Monochrome transfer allows the user to easily replace certain features of one object by alternative features.
 	MonochromeTransfer
 )
+
+func MatSliceToVectorMat(m []Mat) (vectorMat C.VectorMat) {
+	vectorMat = C.VectorMat_CreateWithCapacity(C.uint(len(m)))
+	for _, r := range m {
+		C.VectorMat_PushBack(vectorMat, (C.Mat)(r.p))
+	}
+	return
+}
+
+func IntSliceToVectorInt(is []int) (vectorInt C.VectorInt) {
+	vectorInt = C.VectorInt_CreateWithCapacity(C.uint(len(is)))
+	for _, i := range is {
+		C.VectorInt_PushBack(vectorInt, C.int(i))
+	}
+	return
+}
 
 // ColorChange mix two differently colored versions of an image seamlessly.
 //
@@ -110,28 +156,12 @@ func FastNlMeansDenoisingColoredMultiWithParams(src []Mat, dst *Mat, imgToDenois
 	C.FastNlMeansDenoisingColoredMultiWithParams(matsVector, dst.p, C.int(imgToDenoiseIndex), C.int(temporalWindowSize), C.float(h), C.float(hColor), C.int(templateWindowSize), C.int(searchWindowSize))
 }
 
-// NewMergeMertens returns returns a new MergeMertens white LDR merge algorithm.
-// of type MergeMertens with default parameters.
-// MergeMertens algorithm merge the ldr image should result in a HDR image.
-//
-// For further details, please see:
-// https://docs.opencv.org/master/d6/df5/group__photo__hdr.html
-// https://docs.opencv.org/master/d7/dd6/classcv_1_1MergeMertens.html
-// https://docs.opencv.org/master/d6/df5/group__photo__hdr.html#ga79d59aa3cb3a7c664e59a4b5acc1ccb6
-//
+// NewMergeMertens returns a new MergeMertens HDR algorithm.
 func NewMergeMertens() MergeMertens {
 	return MergeMertens{p: unsafe.Pointer(C.MergeMertens_Create())}
 }
 
-// NewMergeMertensWithParams returns a new MergeMertens white LDR merge algorithm
-// of type MergeMertens with customized parameters.
-// MergeMertens algorithm merge the ldr image should result in a HDR image.
-//
-// For further details, please see:
-// https://docs.opencv.org/master/d6/df5/group__photo__hdr.html
-// https://docs.opencv.org/master/d7/dd6/classcv_1_1MergeMertens.html
-// https://docs.opencv.org/master/d6/df5/group__photo__hdr.html#ga79d59aa3cb3a7c664e59a4b5acc1ccb6
-//
+// NewMergeMertensWithParams returns a new MergeMertens HDR algorithm.
 func NewMergeMertensWithParams(contrast_weight float32, saturation_weight float32, exposure_weight float32) MergeMertens {
 	return MergeMertens{p: unsafe.Pointer(C.MergeMertens_CreateWithParams(C.float(contrast_weight), C.float(saturation_weight), C.float(exposure_weight)))}
 }
@@ -143,24 +173,149 @@ func (b *MergeMertens) Close() error {
 	return nil
 }
 
-// BalanceWhite computes merge LDR images using the current MergeMertens.
-// Return a image MAT : 8bits 3 channel image ( RGB 8 bits )
-// For further details, please see:
-// https://docs.opencv.org/master/d7/dd6/classcv_1_1MergeMertens.html#a2d2254b2aab722c16954de13a663644d
-//
+// Perform MergeMertens operation on src images
 func (b *MergeMertens) Process(src []Mat, dst *Mat) {
-	cMatArray := make([]C.Mat, len(src))
-	for i, r := range src {
-		cMatArray[i] = (C.Mat)(r.p)
-	}
-	// Conversion function from a Golang slice into an array of matrices that are understood by OpenCV
-	matsVector := C.struct_Mats{
-		mats:   (*C.Mat)(&cMatArray[0]),
-		length: C.int(len(src)),
-	}
-	C.MergeMertens_Process((C.MergeMertens)(b.p), matsVector, dst.p)
+	vectorMat := MatSliceToVectorMat(src)
+	defer C.VectorMat_Free(vectorMat)
+
+	C.MergeMertens_Process((C.MergeMertens)(b.p), vectorMat, dst.p)
+	C.VectorMat_Free(vectorMat)
 	// Convert a series of double [0.0,1.0] to [0,255] with Golang
-	dst.ConvertToWithParams(dst, MatTypeCV8UC3, 255.0, 0.0)
+	// dst.ConvertToWithParams(dst, MatTypeCV8UC3, 255.0, 0.0)
+}
+
+// NewMergeDebevec returns a new MergeDebevec HDR merge algorithm.
+func NewMergeDebevec() MergeDebevec {
+	return MergeDebevec{p: unsafe.Pointer(C.MergeDebevec_Create())}
+}
+
+// Close MergeDebevec
+func (b *MergeDebevec) Close() error {
+	C.MergeDebevec_Close((C.MergeDebevec)(b.p))
+	b.p = nil
+	return nil
+}
+
+// Perform MergeDebevec operation on src images with times exposures.
+func (b *MergeDebevec) Process(src []Mat, dst *Mat, times []int) {
+	vectorMat := MatSliceToVectorMat(src)
+	defer C.VectorMat_Free(vectorMat)
+
+	vectorInt := IntSliceToVectorInt(times)
+	defer C.VectorInt_Free(vectorInt)
+
+	C.MergeDebevec_Process((C.MergeDebevec)(b.p), vectorMat, dst.p, vectorInt)
+}
+
+// NewMergeRobertson returns a new MergeRobertson HDR merge algorithm.
+func NewMergeRobertson() MergeRobertson {
+	return MergeRobertson{p: unsafe.Pointer(C.MergeRobertson_Create())}
+}
+
+// Close MergeRobertson
+func (b *MergeRobertson) Close() error {
+	C.MergeRobertson_Close((C.MergeRobertson)(b.p))
+	b.p = nil
+	return nil
+}
+
+// Perform MergeRobertson operation on src images with times exposures.
+func (b *MergeRobertson) Process(src []Mat, dst *Mat, times []int) {
+	vectorMat := MatSliceToVectorMat(src)
+	defer C.VectorMat_Free(vectorMat)
+
+	vectorInt := IntSliceToVectorInt(times)
+	defer C.VectorInt_Free(vectorInt)
+
+	C.MergeRobertson_Process((C.MergeRobertson)(b.p), vectorMat, dst.p, vectorInt)
+}
+
+// NewTonemap returns a new Tonemap.
+func NewTonemap() Tonemap {
+	return Tonemap{p: unsafe.Pointer(C.Tonemap_Create())}
+}
+
+// NewTonemapWithParams returns a new Tonemap.
+func NewTonemapWithParams(gamma float32) Tonemap {
+	return Tonemap{p: unsafe.Pointer(C.Tonemap_CreateWithParams(C.float(gamma)))}
+}
+
+// Map tones of src
+func (b *Tonemap) Process(src Mat, dst *Mat) {
+	C.Tonemap_Process((C.Tonemap)(b.p), src.p, dst.p)
+}
+
+// Close Tonemap
+func (b *Tonemap) Close() error {
+	C.Tonemap_Close((C.Tonemap)(b.p))
+	b.p = nil
+	return nil
+}
+
+// NewTonemapDrago returns a new TonemapDrago
+func NewTonemapDrago() TonemapDrago {
+	return TonemapDrago{p: unsafe.Pointer(C.TonemapDrago_Create())}
+}
+
+// NewTonemapDragoWithParams returns a new TonemapDrago
+func NewTonemapDragoWithParams(gamma float32, saturation float32, bias float32) TonemapDrago {
+	return TonemapDrago{p: unsafe.Pointer(C.TonemapDrago_CreateWithParams(C.float(gamma), C.float(saturation), C.float(bias)))}
+}
+
+// Map tones of src
+func (b *TonemapDrago) Process(src Mat, dst *Mat) {
+	C.TonemapDrago_Process((C.TonemapDrago)(b.p), src.p, dst.p)
+}
+
+// Close TonemapDrago
+func (b *TonemapDrago) Close() error {
+	C.TonemapDrago_Close((C.TonemapDrago)(b.p))
+	b.p = nil
+	return nil
+}
+
+// NewTonemapMantiuk returns a new TonemapMantiuk
+func NewTonemapMantiuk() TonemapMantiuk {
+	return TonemapMantiuk{p: unsafe.Pointer(C.TonemapMantiuk_Create())}
+}
+
+// NewTonemapMantiukWithParams returns a new TonemapMantiuk
+func NewTonemapMantiukWithParams(gamma float32, scale float32, saturation float32) TonemapMantiuk {
+	return TonemapMantiuk{p: unsafe.Pointer(C.TonemapMantiuk_CreateWithParams(C.float(gamma), C.float(scale), C.float(saturation)))}
+}
+
+// Mapt tones of src
+func (b *TonemapMantiuk) Process(src Mat, dst *Mat) {
+	C.TonemapMantiuk_Process((C.TonemapMantiuk)(b.p), src.p, dst.p)
+}
+
+// Close TonemapMantiuk
+func (b *TonemapMantiuk) Close() error {
+	C.TonemapMantiuk_Close((C.TonemapMantiuk)(b.p))
+	b.p = nil
+	return nil
+}
+
+// NewTonemapReinhard returns a new TonemapReinhard
+func NewTonemapReinhard() TonemapReinhard {
+	return TonemapReinhard{p: unsafe.Pointer(C.TonemapReinhard_Create())}
+}
+
+// NewTonemapReinhardWithParams returns a new TonemapReinhard
+func NewTonemapReinhardWithParams(gamma float32, intensity float32, light_adapt float32, color_adapt float32) TonemapReinhard {
+	return TonemapReinhard{p: unsafe.Pointer(C.TonemapReinhard_CreateWithParams(C.float(gamma), C.float(intensity), C.float(light_adapt), C.float(color_adapt)))}
+}
+
+// Map tones of src
+func (b *TonemapReinhard) Process(src Mat, dst *Mat) {
+	C.TonemapReinhard_Process((C.TonemapReinhard)(b.p), src.p, dst.p)
+}
+
+// Close TonemapReinhard
+func (b *TonemapReinhard) Close() error {
+	C.TonemapReinhard_Close((C.TonemapReinhard)(b.p))
+	b.p = nil
+	return nil
 }
 
 // NewAlignMTB returns an AlignMTB for converts images to median threshold bitmaps.

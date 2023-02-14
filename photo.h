@@ -10,14 +10,44 @@ extern "C" {
 #include "core.h"
 
 #ifdef __cplusplus
-// see : https://docs.opencv.org/3.4/d7/dd6/classcv_1_1MergeMertens.html
+
+typedef std::vector<cv::Mat> *VectorMat;
+typedef std::vector<int> *VectorInt;
+
 typedef cv::Ptr<cv::MergeMertens> *MergeMertens;
-// see : https://docs.opencv.org/master/d7/db6/classcv_1_1AlignMTB.html
+typedef cv::Ptr<cv::MergeDebevec> *MergeDebevec;
+typedef cv::Ptr<cv::MergeRobertson> *MergeRobertson;
+typedef cv::Ptr<cv::Tonemap> *Tonemap;
+typedef cv::Ptr<cv::TonemapDrago> *TonemapDrago;
+typedef cv::Ptr<cv::TonemapMantiuk> *TonemapMantiuk;
+typedef cv::Ptr<cv::TonemapReinhard> *TonemapReinhard;
 typedef cv::Ptr<cv::AlignMTB> *AlignMTB;
+
 #else
+
+typedef void *VectorMat;
+typedef void *VectorInt;
+
 typedef void *MergeMertens;
+typedef void *MergeDebevec;
+typedef void *MergeRobertson;
+typedef void *Tonemap;
+typedef void *TonemapDrago;
+typedef void *TonemapMantiuk;
+typedef void *TonemapReinhard;
 typedef void *AlignMTB;
 #endif
+
+VectorMat VectorMat_Create();
+VectorMat VectorMat_CreateWithCapacity(uint size);
+void VectorMat_PushBack(VectorMat m, Mat mat);
+void VectorMat_Free(VectorMat m);
+
+VectorInt VectorInt_Create();
+VectorInt VectorInt_CreateWithCapacity(uint size);
+void VectorInt_PushBack(VectorInt m, int i);
+void VectorInt_Free(VectorInt m);
+
 
 void ColorChange(Mat src, Mat mask, Mat dst, float red_mul, float green_mul, float blue_mul);
 
@@ -36,8 +66,36 @@ void FastNlMeansDenoisingColoredWithParams(Mat src, Mat dst, float h, float hCol
 
 MergeMertens MergeMertens_Create();
 MergeMertens MergeMertens_CreateWithParams(float contrast_weight, float saturation_weight, float exposure_weight);
-void MergeMertens_Process(MergeMertens b, struct Mats src, Mat dst);
+void MergeMertens_Process(MergeMertens b, VectorMat src, Mat dst);
 void MergeMertens_Close(MergeMertens b);
+
+MergeDebevec MergeDebevec_Create();
+void MergeDebevec_Process(MergeDebevec b, VectorMat src, Mat dst, VectorInt times);
+void MergeDebevec_Close(MergeDebevec b);
+
+MergeRobertson MergeRobertson_Create();
+void MergeRobertson_Process(MergeRobertson b, VectorMat src, Mat dst, VectorInt times);
+void MergeRobertson_Close(MergeRobertson b);
+
+Tonemap Tonemap_Create();
+Tonemap Tonemap_CreateWithParams(float gamma);
+void Tonemap_Process(Tonemap b, Mat src, Mat dst);
+void Tonemap_Close(Tonemap b);
+
+TonemapDrago TonemapDrago_Create();
+TonemapDrago TonemapDrago_CreateWithParams(float gamma, float saturation, float bias);
+void TonemapDrago_Process(TonemapDrago b, Mat src, Mat dst);
+void TonemapDrago_Close(TonemapDrago b);
+
+TonemapMantiuk TonemapMantiuk_Create();
+TonemapMantiuk TonemapMantiuk_CreateWithParams(float gamma, float scale, float saturation);
+void TonemapMantiuk_Process(TonemapMantiuk b, Mat src, Mat dst);
+void TonemapMantiuk_Close(TonemapMantiuk b);
+
+TonemapReinhard TonemapReinhard_Create();
+TonemapReinhard TonemapReinhard_CreateWithParams(float gamma, float intensity, float light_adapt, float color_adapt);
+void TonemapReinhard_Process(TonemapReinhard b, Mat src, Mat dst);
+void TonemapReinhard_Close(TonemapReinhard b);
 
 AlignMTB AlignMTB_Create();
 AlignMTB AlignMTB_CreateWithParams(int max_bits, int exclude_range, bool cut);

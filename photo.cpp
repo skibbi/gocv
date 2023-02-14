@@ -1,5 +1,43 @@
 #include "photo.h"
 
+VectorMat VectorMat_Create() {
+    return new std::vector<cv::Mat>();
+}
+VectorMat VectorMat_CreateWithCapacity(uint size) {
+    VectorMat m = VectorMat_Create();
+    m->reserve(size);
+    return m;
+}
+
+void VectorMat_PushBack(VectorMat m, Mat mat) {
+    m->push_back(*mat);
+}
+
+void VectorMat_Free(VectorMat m) {
+    delete m;
+}
+
+
+VectorInt VectorInt_Create() {
+    return new std::vector<int>();
+}
+VectorInt VectorInt_CreateWithCapacity(uint size) {
+    VectorInt m = VectorInt_Create();
+    m->reserve(size);
+    return m;
+}
+
+void VectorInt_PushBack(VectorInt m, int v) {
+    m->push_back(v);
+}
+
+void VectorInt_Free(VectorInt m) {
+    delete m;
+}
+
+
+
+
 void ColorChange(Mat src, Mat mask, Mat dst, float red_mul, float green_mul, float blue_mul) {
     cv::colorChange(*src, *mask, *dst, red_mul, green_mul, blue_mul);
 }
@@ -49,12 +87,96 @@ void MergeMertens_Close(MergeMertens b) {
   delete b;
 }
 
-void MergeMertens_Process(MergeMertens b, struct Mats src, Mat dst) {
-  std::vector<cv::Mat> images;
-  for (int i = 0; i < src.length; ++i) {
-    images.push_back(*src.mats[i]);
-  }
-  (*b)->process(images, *dst);
+void MergeMertens_Process(MergeMertens b, VectorMat src, Mat dst) {
+  (*b)->process(*src, *dst);
+}
+
+MergeDebevec MergeDebevec_Create() {
+  return new cv::Ptr<cv::MergeDebevec>(cv::createMergeDebevec());
+}
+
+void MergeDebevec_Process(MergeDebevec b, VectorMat src, Mat dst, VectorInt times) {
+  (*b)->process(*src, *dst, *times);
+}
+
+void MergeDebevec_Close(MergeDebevec b) {
+  delete b;
+}
+
+MergeRobertson MergeRobertson_Create() {
+  return new cv::Ptr<cv::MergeRobertson>(cv::createMergeRobertson());
+}
+
+void MergeRobertson_Process(MergeRobertson b, VectorMat src, Mat dst, VectorInt times) {
+  (*b)->process(*src, *dst, *times);
+}
+
+void MergeRobertson_Close(MergeRobertson b) {
+  delete b;
+}
+
+Tonemap Tonemap_Create() {
+  return new cv::Ptr<cv::Tonemap>(cv::createTonemap());
+}
+
+Tonemap Tonemap_CreateWithParams(float gamma) {
+  return new cv::Ptr<cv::Tonemap>(cv::createTonemap(gamma));
+}
+
+void Tonemap_Process(Tonemap b, Mat src, Mat dst) {
+  (*b)->process(*src, *dst);
+}
+
+void Tonemap_Close(Tonemap b) {
+  delete b;
+}
+
+TonemapDrago TonemapDrago_Create() {
+  return new cv::Ptr<cv::TonemapDrago>(cv::createTonemapDrago());
+}
+
+TonemapDrago TonemapDrago_CreateWithParams(float gamma, float saturation, float bias) {
+  return new cv::Ptr<cv::TonemapDrago>(cv::createTonemapDrago(gamma, saturation, bias));
+}
+
+void TonemapDrago_Process(TonemapDrago b, Mat src, Mat dst) {
+  (*b)->process(*src, *dst);
+}
+
+void TonemapDrago_Close(TonemapDrago b) {
+  delete b;
+}
+
+TonemapMantiuk TonemapMantiuk_Create() {
+  return new cv::Ptr<cv::TonemapMantiuk>(cv::createTonemapMantiuk());
+}
+
+TonemapMantiuk TonemapMantiuk_CreateWithParams(float gamma, float scale, float saturation) {
+  return new cv::Ptr<cv::TonemapMantiuk>(cv::createTonemapMantiuk(gamma, scale, saturation));
+}
+
+void TonemapMantiuk_Process(TonemapMantiuk b, Mat src, Mat dst) {
+  (*b)->process(*src, *dst);
+}
+
+void TonemapMantiuk_Close(TonemapMantiuk b) {
+  delete b;
+}
+
+TonemapReinhard TonemapReinhard_Create() {
+  return new cv::Ptr<cv::TonemapReinhard>(cv::createTonemapReinhard());
+}
+
+TonemapReinhard TonemapReinhard_CreateWithParams(float gamma, float intensity, float light_adapt, float color_adapt) {
+  return new cv::Ptr<cv::TonemapReinhard>(cv::createTonemapReinhard(gamma, intensity, light_adapt, color_adapt));
+}
+
+void TonemapReinhard_Process(TonemapReinhard b, Mat src, Mat dst) {
+  (*b)->process(*src, *dst);
+}
+
+void TonemapReinhard_Close(TonemapReinhard b) {
+  delete b;
 }
 
 AlignMTB AlignMTB_Create() {
