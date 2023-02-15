@@ -179,7 +179,6 @@ func (b *MergeMertens) Process(src []Mat, dst *Mat) {
 	defer C.VectorMat_Free(vectorMat)
 
 	C.MergeMertens_Process((C.MergeMertens)(b.p), vectorMat, dst.p)
-	C.VectorMat_Free(vectorMat)
 	// Convert a series of double [0.0,1.0] to [0,255] with Golang
 	// dst.ConvertToWithParams(dst, MatTypeCV8UC3, 255.0, 0.0)
 }
