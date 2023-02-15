@@ -81,6 +81,14 @@ func IntSliceToVectorInt(is []int) (vectorInt C.VectorInt) {
 	return
 }
 
+func FloatSliceToVectorFloat(fs []float32) (vectorFloat C.VectorFloat) {
+	vectorFloat = C.VectorFloat_CreateWithCapacity(C.uint(len(fs)))
+	for _, f := range fs {
+		C.VectorFloat_PushBack(vectorFloat, C.float(f))
+	}
+	return
+}
+
 // ColorChange mix two differently colored versions of an image seamlessly.
 //
 // For further details, please see:
@@ -196,14 +204,14 @@ func (b *MergeDebevec) Close() error {
 }
 
 // Perform MergeDebevec operation on src images with times exposures.
-func (b *MergeDebevec) Process(src []Mat, dst *Mat, times []int) {
+func (b *MergeDebevec) Process(src []Mat, dst *Mat, times []float32) {
 	vectorMat := MatSliceToVectorMat(src)
 	defer C.VectorMat_Free(vectorMat)
 
-	vectorInt := IntSliceToVectorInt(times)
-	defer C.VectorInt_Free(vectorInt)
+	vectorTimes := FloatSliceToVectorFloat(times)
+	defer C.VectorFloat_Free(vectorTimes)
 
-	C.MergeDebevec_Process((C.MergeDebevec)(b.p), vectorMat, dst.p, vectorInt)
+	C.MergeDebevec_Process((C.MergeDebevec)(b.p), vectorMat, dst.p, vectorTimes)
 }
 
 // NewMergeRobertson returns a new MergeRobertson HDR merge algorithm.
@@ -219,14 +227,14 @@ func (b *MergeRobertson) Close() error {
 }
 
 // Perform MergeRobertson operation on src images with times exposures.
-func (b *MergeRobertson) Process(src []Mat, dst *Mat, times []int) {
+func (b *MergeRobertson) Process(src []Mat, dst *Mat, times []float32) {
 	vectorMat := MatSliceToVectorMat(src)
 	defer C.VectorMat_Free(vectorMat)
 
-	vectorInt := IntSliceToVectorInt(times)
-	defer C.VectorInt_Free(vectorInt)
+	vectorTimes := FloatSliceToVectorFloat(times)
+	defer C.VectorFloat_Free(vectorTimes)
 
-	C.MergeRobertson_Process((C.MergeRobertson)(b.p), vectorMat, dst.p, vectorInt)
+	C.MergeRobertson_Process((C.MergeRobertson)(b.p), vectorMat, dst.p, vectorTimes)
 }
 
 // NewTonemap returns a new Tonemap.

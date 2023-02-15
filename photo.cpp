@@ -21,6 +21,7 @@ void VectorMat_Free(VectorMat m) {
 VectorInt VectorInt_Create() {
     return new std::vector<int>();
 }
+
 VectorInt VectorInt_CreateWithCapacity(uint size) {
     VectorInt m = VectorInt_Create();
     m->reserve(size);
@@ -36,6 +37,23 @@ void VectorInt_Free(VectorInt m) {
 }
 
 
+VectorFloat VectorFloat_Create() {
+    return new std::vector<float>();
+}
+
+VectorFloat VectorFloat_CreateWithCapacity(uint size) {
+    VectorFloat m = VectorFloat_Create();
+    m->reserve(size);
+    return m;
+}
+
+void VectorFloat_PushBack(VectorFloat m, float v) {
+    m->push_back(v);
+}
+
+void VectorFloat_Free(VectorFloat m) {
+    delete m;
+}
 
 
 void ColorChange(Mat src, Mat mask, Mat dst, float red_mul, float green_mul, float blue_mul) {
@@ -95,7 +113,7 @@ MergeDebevec MergeDebevec_Create() {
   return new cv::Ptr<cv::MergeDebevec>(cv::createMergeDebevec());
 }
 
-void MergeDebevec_Process(MergeDebevec b, VectorMat src, Mat dst, VectorInt times) {
+void MergeDebevec_Process(MergeDebevec b, VectorMat src, Mat dst, VectorFloat times) {
   (*b)->process(*src, *dst, *times);
 }
 
@@ -107,7 +125,7 @@ MergeRobertson MergeRobertson_Create() {
   return new cv::Ptr<cv::MergeRobertson>(cv::createMergeRobertson());
 }
 
-void MergeRobertson_Process(MergeRobertson b, VectorMat src, Mat dst, VectorInt times) {
+void MergeRobertson_Process(MergeRobertson b, VectorMat src, Mat dst, VectorFloat times) {
   (*b)->process(*src, *dst, *times);
 }
 

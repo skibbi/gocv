@@ -13,6 +13,7 @@ extern "C" {
 
 typedef std::vector<cv::Mat> *VectorMat;
 typedef std::vector<int> *VectorInt;
+typedef std::vector<float> *VectorFloat;
 
 typedef cv::Ptr<cv::MergeMertens> *MergeMertens;
 typedef cv::Ptr<cv::MergeDebevec> *MergeDebevec;
@@ -27,6 +28,7 @@ typedef cv::Ptr<cv::AlignMTB> *AlignMTB;
 
 typedef void *VectorMat;
 typedef void *VectorInt;
+typedef void *VectorFloat;
 
 typedef void *MergeMertens;
 typedef void *MergeDebevec;
@@ -45,8 +47,13 @@ void VectorMat_Free(VectorMat m);
 
 VectorInt VectorInt_Create();
 VectorInt VectorInt_CreateWithCapacity(uint size);
-void VectorInt_PushBack(VectorInt m, int i);
+void VectorInt_PushBack(VectorInt m, int v);
 void VectorInt_Free(VectorInt m);
+
+VectorFloat VectorFloat_Create();
+VectorFloat VectorFloat_CreateWithCapacity(uint size);
+void VectorFloat_PushBack(VectorFloat m, float v);
+void VectorFloat_Free(VectorFloat m);
 
 
 void ColorChange(Mat src, Mat mask, Mat dst, float red_mul, float green_mul, float blue_mul);
@@ -70,11 +77,11 @@ void MergeMertens_Process(MergeMertens b, VectorMat src, Mat dst);
 void MergeMertens_Close(MergeMertens b);
 
 MergeDebevec MergeDebevec_Create();
-void MergeDebevec_Process(MergeDebevec b, VectorMat src, Mat dst, VectorInt times);
+void MergeDebevec_Process(MergeDebevec b, VectorMat src, Mat dst, VectorFloat times);
 void MergeDebevec_Close(MergeDebevec b);
 
 MergeRobertson MergeRobertson_Create();
-void MergeRobertson_Process(MergeRobertson b, VectorMat src, Mat dst, VectorInt times);
+void MergeRobertson_Process(MergeRobertson b, VectorMat src, Mat dst, VectorFloat times);
 void MergeRobertson_Close(MergeRobertson b);
 
 Tonemap Tonemap_Create();
